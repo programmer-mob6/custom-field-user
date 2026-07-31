@@ -1,0 +1,34 @@
+{
+  "name": "custom-field-user",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint src",
+    "format": "oxfmt --write src package.json vite.config.ts tsconfig.json tsconfig.app.json oxlint.json",
+    "check": "oxfmt --check src package.json vite.config.ts tsconfig.json tsconfig.app.json oxlint.json && oxlint src && tsc -b"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^3.31.0",
+    "@emotion/react": "^11.14.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.12.0",
+    "zustand": "^5.0.10"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/typescript-estree": "^8.48.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "oxfmt": "^0.35.0",
+    "oxlint": "^1.46.0",
+    "tailwindcss": "^4.1.18",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.0"
+  }
+}
