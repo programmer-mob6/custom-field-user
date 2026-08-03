@@ -38,8 +38,8 @@ export function ConfirmActionDialog({ confirm, onConfirm, onClose }: Props) {
         onConfirm={onConfirm}
       >
         <p>
-          Deactivating this field will hide it and its data from all user forms. You can
-          reactivate it later.
+          Deactivating this field will hide it and its data from all user forms. You can reactivate
+          it later.
         </p>
       </ConfirmDialog>
     );
@@ -54,8 +54,8 @@ export function ConfirmActionDialog({ confirm, onConfirm, onClose }: Props) {
       onConfirm={onConfirm}
     >
       <p>
-        Changing the data type will reset all existing values for this field. This action cannot
-        be undone.
+        Changing the data type will reset all existing values for this field. This action cannot be
+        undone.
       </p>
     </ConfirmDialog>
   );

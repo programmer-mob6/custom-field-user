@@ -524,7 +524,7 @@ tbody tr:last-child td {
   box-shadow: 0 20px 55px #14233b4f;
 }
 
-.modal>header {
+.modal > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -551,8 +551,8 @@ tbody tr:last-child td {
   gap: 18px;
 }
 
-.form-grid>label,
-.values-editor>label {
+.form-grid > label,
+.values-editor > label {
   display: grid;
   gap: 7px;
   color: #3c4d65;

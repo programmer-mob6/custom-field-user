@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["**/features/**"],
+            "message": "shared/ must not import from features/ — this breaks the one-way dependency rule (features -> shared only)."
+          }
+        ]
+      }
+    ]
+  }
+}

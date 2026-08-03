@@ -28,7 +28,12 @@ function DropdownValuesEditor({
             <span className="chip" key={value}>
               {value}
               <button
-                onClick={() => update("values", draft.values.filter((item) => item !== value))}
+                onClick={() =>
+                  update(
+                    "values",
+                    draft.values.filter((item) => item !== value),
+                  )
+                }
                 aria-label={`Remove ${value}`}
               >
                 <X size={12} />

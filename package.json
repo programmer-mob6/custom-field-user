@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint src",
-    "format": "oxfmt --write src package.json vite.config.ts tsconfig.json tsconfig.app.json oxlint.json",
-    "check": "oxfmt --check src package.json vite.config.ts tsconfig.json tsconfig.app.json oxlint.json && oxlint src && tsc -b"
+    "format": "oxfmt --write src package.json vite.config.ts tsconfig.json tsconfig.app.json .oxlintrc.json",
+    "check": "oxfmt --check src package.json vite.config.ts tsconfig.json tsconfig.app.json .oxlintrc.json && oxlint src && tsc -b"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.31.0",

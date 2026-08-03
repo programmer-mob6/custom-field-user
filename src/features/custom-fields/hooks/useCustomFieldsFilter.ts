@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { dataTypes, type CustomField, type DataType } from "../types/customField.types";
 import { useDebouncedValue } from "../../../shared/hooks/useDebouncedValue";
@@ -36,20 +36,23 @@ export function useCustomFieldsFilter(fields: CustomField[]) {
   const status = readStatus(searchParams.get("status"));
   const required = readRequired(searchParams.get("required"));
 
-  const setParam = (key: string, value: string) =>
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        if (!value || value === "all") next.delete(key);
-        else next.set(key, value);
-        return next;
-      },
-      { replace: true },
-    );
+  const setParam = useCallback(
+    (key: string, value: string) =>
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (!value || value === "all") next.delete(key);
+          else next.set(key, value);
+          return next;
+        },
+        { replace: true },
+      ),
+    [setSearchParams],
+  );
 
   useEffect(() => {
     setParam("q", debouncedSearch);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, setParam]);
 
   const setType = (value: TypeFilter) => setParam("type", value);
   const setStatus = (value: StatusFilter) => setParam("status", value);

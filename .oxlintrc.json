@@ -1,4 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "rules": { "correctness": "error", "suspicious": "warn" }
+  "plugins": ["oxc", "typescript", "unicorn", "react"],
+  "categories": { "correctness": "error", "suspicious": "warn" },
+  "rules": { "react/react-in-jsx-scope": "off" }
 }

@@ -111,9 +111,7 @@ export function CustomFieldTable({
               )}
               {!hiddenColumns.has("required") && <td>{field.required ? "Yes" : "No"}</td>}
               {!hiddenColumns.has("updatedAt") && (
-                <td>
-                  {dateFormatter.format(new Date(field.updatedAt))}
-                </td>
+                <td>{dateFormatter.format(new Date(field.updatedAt))}</td>
               )}
               <td className="row-menu">
                 <MenuRoot positioning={{ placement: "bottom-end" }}>
@@ -130,7 +128,11 @@ export function CustomFieldTable({
                         </MenuItem>
                       )}
                       {permission.delete && (
-                        <MenuItem value="delete" className="danger-text" onSelect={() => onDelete(field)}>
+                        <MenuItem
+                          value="delete"
+                          className="danger-text"
+                          onSelect={() => onDelete(field)}
+                        >
                           <Trash2 size={15} /> Delete
                         </MenuItem>
                       )}

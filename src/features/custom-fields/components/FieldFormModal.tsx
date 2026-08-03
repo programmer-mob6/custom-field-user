@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Info } from "lucide-react";
-import { blankDraft, dataTypes, toDraft, type CustomField, type FieldDraft } from "../types/customField.types";
+import {
+  blankDraft,
+  dataTypes,
+  toDraft,
+  type CustomField,
+  type FieldDraft,
+} from "../types/customField.types";
 import { DataTypeConfigSection } from "./DataTypeConfigEditors";
 import { Modal } from "../../../shared/components/Modal";
 
