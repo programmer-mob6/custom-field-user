@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-const CustomFieldsPage = lazy(() => import("./pages/CustomFieldsPage"));
+const CustomFieldsPage = lazy(() => import("./features/custom-fields/pages/CustomFieldsPage"));
 export default function App() {
   return (
     <Suspense fallback={<div className="page-loader">Loading Custom Fields…</div>}>

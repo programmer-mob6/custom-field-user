@@ -23,7 +23,6 @@ export type FieldDraft = {
   required: boolean;
 };
 
-export type Permission = { read: boolean; create: boolean; update: boolean; delete: boolean };
 export type ColumnKey = "dataType" | "valueSetting" | "required" | "updatedAt";
 export type ConfirmAction =
   | { kind: "delete"; field: CustomField }

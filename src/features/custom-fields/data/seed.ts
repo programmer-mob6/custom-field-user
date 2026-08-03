@@ -1,4 +1,4 @@
-import type { CustomField } from "../types/customField";
+import type { CustomField } from "../types/customField.types";
 
 export const seedFields: CustomField[] = [
   {

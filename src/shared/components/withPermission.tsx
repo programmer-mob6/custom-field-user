@@ -1,13 +1,13 @@
 import type { ComponentType } from "react";
-import { useAppContext } from "../context/AppContext";
-import type { Permission } from "../types/customField";
+import { usePermissionStore } from "../store/permissionStore";
+import type { Permission } from "../types/permission";
 
 export function withPermission<P extends object>(
   Wrapped: ComponentType<P>,
   required: keyof Permission,
 ) {
   function PermissionGate(props: P) {
-    const { permission } = useAppContext();
+    const permission = usePermissionStore((state) => state.permission);
     if (!permission[required]) return null;
     return <Wrapped {...props} />;
   }

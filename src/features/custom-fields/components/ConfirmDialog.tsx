@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Modal } from "./Modal";
+import { DialogBody, DialogFooter } from "@chakra-ui/react";
+import { Modal } from "../../../shared/components/Modal";
 
 type Props = {
   title: string;
@@ -18,16 +19,16 @@ export function ConfirmDialog({
   onClose,
 }: Props) {
   return (
-    <Modal title={title} onClose={onClose} className="confirm-modal">
-      <div className="modal-body">{children}</div>
-      <footer>
+    <Modal title={title} onClose={onClose} className="confirm-modal" role="alertdialog">
+      <DialogBody className="modal-body">{children}</DialogBody>
+      <DialogFooter>
         <button className="button secondary" onClick={onClose}>
           Cancel
         </button>
         <button className={`button ${danger ? "danger" : "primary"}`} onClick={onConfirm}>
           {confirmLabel}
         </button>
-      </footer>
+      </DialogFooter>
     </Modal>
   );
 }

@@ -282,10 +282,6 @@ nav a.active {
 }
 
 .columns-popover {
-  position: absolute;
-  z-index: 2;
-  top: 194px;
-  right: 42px;
   display: grid;
   gap: 10px;
   width: 190px;
@@ -390,10 +386,6 @@ tbody tr:last-child td {
 }
 
 .menu {
-  position: absolute;
-  z-index: 3;
-  right: 20px;
-  top: 39px;
   display: grid;
   width: 130px;
   padding: 5px;

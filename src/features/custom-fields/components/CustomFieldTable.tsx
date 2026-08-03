@@ -1,7 +1,9 @@
+import { MenuContent, MenuItem, MenuPositioner, MenuRoot, MenuTrigger } from "@chakra-ui/react";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
-import { useAppContext } from "../context/AppContext";
-import type { ColumnKey, CustomField } from "../types/customField";
+import { useMemo } from "react";
+import { usePermissionStore } from "../../../shared/store/permissionStore";
+import type { ColumnKey, CustomField } from "../types/customField.types";
+import { FieldValueCell } from "./FieldValueRenderers";
 
 type Props = {
   fields: CustomField[];
@@ -15,6 +17,13 @@ type Props = {
 };
 const displayType = (type: CustomField["dataType"]) =>
   type.replace("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const dateFormatter = new Intl.DateTimeFormat("en", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+
 export function CustomFieldTable({
   fields,
   selected,
@@ -25,8 +34,7 @@ export function CustomFieldTable({
   onToggle,
   onShowValues,
 }: Props) {
-  const { permission } = useAppContext();
-  const [menu, setMenu] = useState<string | null>(null);
+  const permission = usePermissionStore((state) => state.permission);
   const allSelected = fields.length > 0 && fields.every((field) => selected.includes(field.id));
   const visibleIds = useMemo(() => fields.map((field) => field.id), [fields]);
   const toggleAll = () =>
@@ -98,69 +106,37 @@ export function CustomFieldTable({
               )}
               {!hiddenColumns.has("valueSetting") && (
                 <td>
-                  {field.dataType === "dropdown" ? (
-                    <div className="badges">
-                      {field.values.slice(0, 2).map((value) => (
-                        <span className="badge" key={value}>
-                          {value}
-                        </span>
-                      ))}
-                      {field.values.length > 2 && (
-                        <button className="more-badge" onClick={() => onShowValues(field)}>
-                          +{field.values.length - 2} More
-                        </button>
-                      )}
-                    </div>
-                  ) : field.dataType === "numeric" ? (
-                    `${field.decimalPlaces} decimal places`
-                  ) : (
-                    "—"
-                  )}
+                  <FieldValueCell field={field} onShowValues={onShowValues} />
                 </td>
               )}
               {!hiddenColumns.has("required") && <td>{field.required ? "Yes" : "No"}</td>}
               {!hiddenColumns.has("updatedAt") && (
                 <td>
-                  {new Intl.DateTimeFormat("en", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  }).format(new Date(field.updatedAt))}
+                  {dateFormatter.format(new Date(field.updatedAt))}
                 </td>
               )}
               <td className="row-menu">
-                <button
-                  className="icon-button"
-                  onClick={() => setMenu(menu === field.id ? null : field.id)}
-                  aria-label={`Actions for ${field.fieldName}`}
-                >
-                  <MoreHorizontal size={18} />
-                </button>
-                {menu === field.id && (
-                  <div className="menu">
-                    {permission.update && (
-                      <button
-                        onClick={() => {
-                          setMenu(null);
-                          onEdit(field);
-                        }}
-                      >
-                        <Pencil size={15} /> Edit
-                      </button>
-                    )}
-                    {permission.delete && (
-                      <button
-                        className="danger-text"
-                        onClick={() => {
-                          setMenu(null);
-                          onDelete(field);
-                        }}
-                      >
-                        <Trash2 size={15} /> Delete
-                      </button>
-                    )}
-                  </div>
-                )}
+                <MenuRoot positioning={{ placement: "bottom-end" }}>
+                  <MenuTrigger asChild>
+                    <button className="icon-button" aria-label={`Actions for ${field.fieldName}`}>
+                      <MoreHorizontal size={18} />
+                    </button>
+                  </MenuTrigger>
+                  <MenuPositioner>
+                    <MenuContent className="menu">
+                      {permission.update && (
+                        <MenuItem value="edit" onSelect={() => onEdit(field)}>
+                          <Pencil size={15} /> Edit
+                        </MenuItem>
+                      )}
+                      {permission.delete && (
+                        <MenuItem value="delete" className="danger-text" onSelect={() => onDelete(field)}>
+                          <Trash2 size={15} /> Delete
+                        </MenuItem>
+                      )}
+                    </MenuContent>
+                  </MenuPositioner>
+                </MenuRoot>
               </td>
             </tr>
           ))}

@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { Info, Plus, X } from "lucide-react";
-import { useCustomFieldStore } from "../store/customFieldStore";
-import {
-  blankDraft,
-  dataTypes,
-  toDraft,
-  type CustomField,
-  type FieldDraft,
-} from "../types/customField";
-import { useAppContext } from "../context/AppContext";
-import { Modal } from "./Modal";
+import { Info } from "lucide-react";
+import { blankDraft, dataTypes, toDraft, type CustomField, type FieldDraft } from "../types/customField.types";
+import { DataTypeConfigSection } from "./DataTypeConfigEditors";
+import { Modal } from "../../../shared/components/Modal";
 
+// Abstraction FieldFormModal depends on — how these are fulfilled (a store,
+// an API call, a mock) is entirely up to whoever renders this component.
 type Props = {
   field?: CustomField;
+  existingFields: CustomField[];
+  onCreate: (draft: FieldDraft) => void;
+  onUpdate: (id: string, draft: FieldDraft) => void;
+  onNotify: (message: string) => void;
   onClose: () => void;
   onDataTypeWarning: (draft: FieldDraft) => void;
 };
@@ -25,21 +24,27 @@ const labels: Record<(typeof dataTypes)[number], string> = {
   phone: "Phone",
 };
 
-export function FieldFormModal({ field, onClose, onDataTypeWarning }: Props) {
+export function FieldFormModal({
+  field,
+  existingFields,
+  onCreate,
+  onUpdate,
+  onNotify,
+  onClose,
+  onDataTypeWarning,
+}: Props) {
   const isEdit = Boolean(field);
   const [draft, setDraft] = useState<FieldDraft>(() => (field ? toDraft(field) : blankDraft()));
   const [stay, setStay] = useState(false);
   const [valueInput, setValueInput] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { fields, createField, updateField } = useCustomFieldStore();
-  const { notify } = useAppContext();
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
   const update = <K extends keyof FieldDraft>(key: K, value: FieldDraft[K]) =>
     setDraft((current) => ({ ...current, [key]: value }));
-  const duplicate = fields.some(
+  const duplicate = existingFields.some(
     (item) =>
       item.id !== field?.id &&
       item.fieldName.trim().toLowerCase() === draft.fieldName.trim().toLowerCase(),
@@ -67,11 +72,11 @@ export function FieldFormModal({ field, onClose, onDataTypeWarning }: Props) {
   };
   const save = () => {
     if (field) {
-      updateField(field.id, draft);
-      notify("Success, Custom Field has been updated.");
+      onUpdate(field.id, draft);
+      onNotify("Success, Custom Field has been updated.");
     } else {
-      createField(draft);
-      notify("Success, Custom Field has been created.");
+      onCreate(draft);
+      onNotify("Success, Custom Field has been created.");
     }
     if (!field && stay) {
       setDraft(blankDraft());
@@ -122,64 +127,14 @@ export function FieldFormModal({ field, onClose, onDataTypeWarning }: Props) {
           </select>
         </label>
 
-        {draft.dataType === "dropdown" && (
-          <div className="values-editor">
-            <label>
-              Values <b>*</b>
-              <div className="chip-input">
-                {draft.values.map((value) => (
-                  <span className="chip" key={value}>
-                    {value}
-                    <button
-                      onClick={() =>
-                        update(
-                          "values",
-                          draft.values.filter((item) => item !== value),
-                        )
-                      }
-                      aria-label={`Remove ${value}`}
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-                <input
-                  value={valueInput}
-                  onChange={(event) => setValueInput(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      addValue();
-                    }
-                  }}
-                  placeholder="Type a value and press Enter"
-                />
-              </div>
-            </label>
-            <button className="text-button" onClick={addValue}>
-              <Plus size={15} /> Add value
-            </button>
-            <p>Press enter to add new value or click the badge to edit</p>
-            {submitted && !draft.values.length && (
-              <small className="error">At least one value is required</small>
-            )}
-          </div>
-        )}
-        {draft.dataType === "numeric" && (
-          <fieldset>
-            <legend>Decimal Places</legend>
-            {([0, 1, 2] as const).map((places) => (
-              <label className="radio" key={places}>
-                <input
-                  type="radio"
-                  checked={draft.decimalPlaces === places}
-                  onChange={() => update("decimalPlaces", places)}
-                />{" "}
-                {places}
-              </label>
-            ))}
-          </fieldset>
-        )}
+        <DataTypeConfigSection
+          draft={draft}
+          update={update}
+          valueInput={valueInput}
+          setValueInput={setValueInput}
+          addValue={addValue}
+          submitted={submitted}
+        />
         <label className="switch-label">
           Required{" "}
           <button

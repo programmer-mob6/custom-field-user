@@ -1,29 +1,19 @@
-import { Download, Filter, History, Plus, Search, Settings2, X } from "lucide-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { Download, Filter, History, Plus, Search } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { withPermission } from "../../../shared/components/withPermission";
+import { Modal } from "../../../shared/components/Modal";
+import { useDisclosure } from "../../../shared/hooks/useDisclosure";
+import { usePermissionStore } from "../../../shared/store/permissionStore";
+import { useToastStore } from "../../../shared/store/toastStore";
+import { ColumnVisibilityPopover } from "../components/ColumnVisibilityPopover";
+import { ConfirmActionDialog } from "../components/ConfirmActionDialog";
 import { CustomFieldTable } from "../components/CustomFieldTable";
 import { FieldFormModal } from "../components/FieldFormModal";
-import { ConfirmDialog } from "../components/ConfirmDialog";
-import { Modal } from "../components/Modal";
-import { SelectFilter } from "../components/SelectFilter";
-import { withPermission } from "../components/withPermission";
-import { useAppContext } from "../context/AppContext";
-import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import { useDisclosure } from "../hooks/useDisclosure";
+import { FilterPanel } from "../components/FilterPanel";
+import { useCustomFieldsFilter } from "../hooks/useCustomFieldsFilter";
 import { useCustomFieldStore } from "../store/customFieldStore";
-import type {
-  ColumnKey,
-  ConfirmAction,
-  CustomField,
-  DataType,
-  FieldDraft,
-} from "../types/customField";
+import type { ColumnKey, ConfirmAction, CustomField, FieldDraft } from "../types/customField.types";
 
-const columnLabels: Record<ColumnKey, string> = {
-  dataType: "Data Type",
-  valueSetting: "Value Setting",
-  required: "Required",
-  updatedAt: "Last Update",
-};
 const CreateButton = withPermission(
   ({ onClick }: { onClick: () => void }) => (
     <button className="button primary create-button" onClick={onClick}>
@@ -35,44 +25,36 @@ const CreateButton = withPermission(
 
 export default function CustomFieldsPage() {
   const fields = useCustomFieldStore((state) => state.fields);
-  const { permission, notify, setPermission } = useAppContext();
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState<DataType | "all">("all");
-  const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
-  const [required, setRequired] = useState<"all" | "yes" | "no">("all");
+  const permission = usePermissionStore((state) => state.permission);
+  const setPermission = usePermissionStore((state) => state.setPermission);
+  const notify = useToastStore((state) => state.notify);
+  const {
+    search,
+    setSearch,
+    type,
+    setType,
+    status,
+    setStatus,
+    required,
+    setRequired,
+    filtered,
+    clearFilters,
+  } = useCustomFieldsFilter(fields);
   const [selected, setSelected] = useState<string[]>([]);
   const [hiddenColumns, setHiddenColumns] = useState<Set<ColumnKey>>(new Set());
   const [editing, setEditing] = useState<CustomField | undefined>();
   const [confirm, setConfirm] = useState<ConfirmAction>(null);
   const [valueField, setValueField] = useState<CustomField | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [showColumns, setShowColumns] = useState(false);
   const [showLog, setShowLog] = useState(false);
   const [page, setPage] = useState(1);
   // Uncontrolled until Enter: this mirrors the PRD's page-jump behavior.
   const pageInputRef = useRef<HTMLInputElement>(null);
   const form = useDisclosure();
-  const debouncedSearch = useDebouncedValue(search);
   const setActive = useCustomFieldStore((state) => state.setActive);
   const deleteField = useCustomFieldStore((state) => state.deleteField);
-  const filtered = useMemo(
-    () =>
-      fields
-        .filter((field) => {
-          const query = debouncedSearch.toLowerCase();
-          return (
-            (!query ||
-              [field.fieldName, field.dataType, field.required ? "yes" : "no"].some((value) =>
-                value.toLowerCase().includes(query),
-              )) &&
-            (type === "all" || field.dataType === type) &&
-            (status === "all" || (status === "active") === field.isActive) &&
-            (required === "all" || (required === "yes") === field.required)
-          );
-        })
-        .sort((a, b) => a.fieldName.localeCompare(b.fieldName, "en", { sensitivity: "base" })),
-    [fields, debouncedSearch, type, status, required],
-  );
+  const createField = useCustomFieldStore((state) => state.createField);
+  const updateField = useCustomFieldStore((state) => state.updateField);
   const openCreate = useCallback(() => {
     setEditing(undefined);
     form.open();
@@ -187,72 +169,20 @@ export default function CustomFieldsPage() {
             <button className="tool-button" onClick={() => setShowLog(true)}>
               <History size={18} /> Changelog
             </button>
-            <button className="tool-button" onClick={() => setShowColumns(!showColumns)}>
-              <Settings2 size={18} /> Columns
-            </button>
+            <ColumnVisibilityPopover hiddenColumns={hiddenColumns} onToggle={toggleColumn} />
           </div>
           <CreateButton onClick={openCreate} />
         </div>
         {showFilters && (
-          <div className="filter-panel">
-            <SelectFilter
-              label="Data Type"
-              value={type}
-              onChange={setType}
-              options={[
-                { value: "all", label: "All types" },
-                ...(
-                  ["text", "text_area", "dropdown", "date", "numeric", "phone"] as DataType[]
-                ).map((value) => ({ value, label: value.replace("_", " ") })),
-              ]}
-            />
-            <SelectFilter
-              label="Required"
-              value={required}
-              onChange={setRequired}
-              options={[
-                { value: "all", label: "All" },
-                { value: "yes", label: "Yes" },
-                { value: "no", label: "No" },
-              ]}
-            />
-            <SelectFilter
-              label="Active"
-              value={status}
-              onChange={setStatus}
-              options={[
-                { value: "all", label: "All statuses" },
-                { value: "active", label: "Active" },
-                { value: "inactive", label: "Inactive" },
-              ]}
-            />
-            <button
-              className="clear-filter"
-              onClick={() => {
-                setType("all");
-                setStatus("all");
-                setRequired("all");
-                setSearch("");
-              }}
-            >
-              <X size={15} /> Clear filters
-            </button>
-          </div>
-        )}
-        {showColumns && (
-          <div className="columns-popover">
-            <b>Column Visibility</b>
-            {(Object.keys(columnLabels) as ColumnKey[]).map((key) => (
-              <label key={key}>
-                <input
-                  type="checkbox"
-                  checked={!hiddenColumns.has(key)}
-                  onChange={() => toggleColumn(key)}
-                />{" "}
-                {columnLabels[key]}
-              </label>
-            ))}
-          </div>
+          <FilterPanel
+            type={type}
+            setType={setType}
+            status={status}
+            setStatus={setStatus}
+            required={required}
+            setRequired={setRequired}
+            onClear={clearFilters}
+          />
         )}
         {selected.length > 0 && (
           <div className="bulk-bar">
@@ -325,6 +255,10 @@ export default function CustomFieldsPage() {
       {form.isOpen && (
         <FieldFormModal
           field={editing}
+          existingFields={fields}
+          onCreate={createField}
+          onUpdate={updateField}
+          onNotify={notify}
           onClose={form.close}
           onDataTypeWarning={formDataTypeWarning}
         />
@@ -364,49 +298,11 @@ export default function CustomFieldsPage() {
           </footer>
         </Modal>
       )}
-      {confirm?.kind === "delete" && (
-        <ConfirmDialog
-          title="Delete Custom Field"
-          confirmLabel="Delete"
-          danger
-          onClose={() => setConfirm(null)}
-          onConfirm={confirmAction}
-        >
-          <p>
-            - <b>{confirm.field.fieldName}</b>
-          </p>
-          <p>All user data for this field will be permanently lost.</p>
-          <p>This action cannot be undone. Are you sure you want to delete it?</p>
-        </ConfirmDialog>
-      )}
-      {confirm?.kind === "deactivate" && (
-        <ConfirmDialog
-          title="Deactivate Custom Field"
-          confirmLabel="Deactivate"
-          danger
-          onClose={() => setConfirm(null)}
-          onConfirm={confirmAction}
-        >
-          <p>
-            Deactivating this field will hide it and its data from all user forms. You can
-            reactivate it later.
-          </p>
-        </ConfirmDialog>
-      )}
-      {confirm?.kind === "dataType" && (
-        <ConfirmDialog
-          title="Change Data Type"
-          confirmLabel="Change Data Type"
-          danger
-          onClose={() => setConfirm(null)}
-          onConfirm={confirmAction}
-        >
-          <p>
-            Changing the data type will reset all existing values for this field. This action cannot
-            be undone.
-          </p>
-        </ConfirmDialog>
-      )}
+      <ConfirmActionDialog
+        confirm={confirm}
+        onConfirm={confirmAction}
+        onClose={() => setConfirm(null)}
+      />
     </main>
   );
 }

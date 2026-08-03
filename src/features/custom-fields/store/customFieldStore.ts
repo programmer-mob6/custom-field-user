@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { seedFields } from "../data/seed";
-import type { CustomField, FieldDraft } from "../types/customField";
+import type { CustomField, FieldDraft } from "../types/customField.types";
 
 type Store = {
   fields: CustomField[];
