@@ -388,7 +388,8 @@ tbody tr:last-child td {
 
 .menu {
   display: grid;
-  width: 130px;
+  width: max-content;
+  min-width: 130px;
   padding: 5px;
   border: 1px solid #e0e5ec;
   border-radius: 7px;
@@ -396,7 +397,8 @@ tbody tr:last-child td {
   box-shadow: 0 10px 20px #2536531d;
 }
 
-.menu button {
+.menu button,
+.menu [role="menuitem"] {
   display: flex;
   gap: 7px;
   align-items: center;
@@ -405,10 +407,22 @@ tbody tr:last-child td {
   background: white;
   padding: 8px;
   text-align: left;
+  white-space: nowrap;
 }
 
-.menu button:hover {
+.menu button:hover,
+.menu [role="menuitem"]:hover {
   background: #f4f6fa;
+}
+
+.menu-empty-state {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 8px;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
 }
 
 .switch {

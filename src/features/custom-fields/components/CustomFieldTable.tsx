@@ -1,5 +1,5 @@
 import { MenuContent, MenuItem, MenuPositioner, MenuRoot, MenuTrigger } from "@chakra-ui/react";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, BadgeInfo } from "lucide-react";
 import { useMemo } from "react";
 import { usePermissionStore } from "../../../shared/store/permissionStore";
 import type { ColumnKey, CustomField } from "../types/customField.types";
@@ -135,6 +135,11 @@ export function CustomFieldTable({
                         >
                           <Trash2 size={15} /> Delete
                         </MenuItem>
+                      )}
+                      {!permission.update && !permission.delete && (
+                        <div className="menu-empty-state">
+                          <BadgeInfo size={15} /> No options available
+                        </div>
                       )}
                     </MenuContent>
                   </MenuPositioner>
