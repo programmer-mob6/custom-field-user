@@ -1,5 +1,7 @@
-import { Download, Filter, Search } from "lucide-react";
+import { Download, Filter, Plus, Search } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
+import { useNavigate } from "react-router-dom";
+import { withPermission } from "../../../shared/components/withPermission";
 import { useToastStore } from "../../../shared/store/toastStore";
 
 type Props = {
@@ -8,6 +10,20 @@ type Props = {
   showFilters: boolean;
   setShowFilters: Dispatch<SetStateAction<boolean>>;
 };
+
+// Activating a TAG is a write to the registry, so the button is hidden
+// outright without Update — not merely disabled (PRD §1.5).
+const ActivateTagButton = withPermission(function ActivateTagButton() {
+  const navigate = useNavigate();
+  return (
+    <button
+      className="button primary create-button"
+      onClick={() => navigate("/global-settings/tag/activate")}
+    >
+      <Plus size={17} /> Activate TAG
+    </button>
+  );
+}, "update");
 
 export function TagToolbar({ search, setSearch, showFilters, setShowFilters }: Props) {
   const notify = useToastStore((state) => state.notify);
@@ -32,6 +48,7 @@ export function TagToolbar({ search, setSearch, showFilters, setShowFilters }: P
           <Download size={18} /> Download
         </button>
       </div>
+      <ActivateTagButton />
     </div>
   );
 }
