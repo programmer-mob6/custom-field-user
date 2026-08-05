@@ -14,7 +14,7 @@ import { Modal } from "../../../shared/components/Modal";
 // an API call, a mock) is entirely up to whoever renders this component.
 type Props = {
   field?: CustomField;
-  existingFields: CustomField[];
+  existingFields: Pick<CustomField, "id" | "fieldName">[];
   onCreate: (draft: FieldDraft) => void;
   onUpdate: (id: string, draft: FieldDraft) => void;
   onNotify: (message: string) => void;
