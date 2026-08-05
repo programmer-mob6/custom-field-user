@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { ConfirmAction } from "../types/customField.types";
 import { useCustomFieldStore } from "../store/customFieldStore";
 import { useToastStore } from "../../../shared/store/toastStore";
+import { usePermissionStore } from "../../../shared/store/permissionStore";
 
 type Props = {
   activeCount: number;
@@ -12,11 +13,12 @@ type Props = {
 export function BulkActionBar({ activeCount, setSelected, setConfirm, selected }: Props) {
   const setActive = useCustomFieldStore((state) => state.setActive);
   const notify = useToastStore((state) => state.notify);
+  const permission = usePermissionStore((state) => state.permission);
 
   return (
     <div className="bulk-bar">
       <b>{selected.length} selected</b>
-      {activeCount < selected.length && (
+      {permission.update && activeCount < selected.length && (
         <button
           onClick={() => {
             setActive(selected, true);
@@ -27,7 +29,7 @@ export function BulkActionBar({ activeCount, setSelected, setConfirm, selected }
           Activate
         </button>
       )}
-      {activeCount > 0 && (
+      {permission.update && activeCount > 0 && (
         <button
           className="danger-text"
           onClick={() => setConfirm({ kind: "deactivate", ids: selected })}
